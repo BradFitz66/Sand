@@ -7,7 +7,7 @@ Sänd is a falling sand simulation made in Love2D. It's based on other falling s
   wxSand
   Powder Game
   
-# ToDo:
+### ToDo:
 - [ ] Add multithreading (I don't really know much about multithreading in general so this may never be done)
 - [ ] GPU simulation (another massive IF. I'm not good with shaders or GPU related code in general)
 - [ ] UI
