@@ -8,7 +8,7 @@ local setColor,points,line,circle=love.graphics.setColor,love.graphics.points,lo
 local isMouseDown,floor=love.mouse.isDown,math.floor
 --End of local variables
 
-currentType=1
+currentType=2
 debug=false
 paused=nil
 particleTypes=nil
@@ -21,7 +21,15 @@ function love.load()
     love.mouse.setVisible(false)
     UI=require'Resources.scripts.UI'.load()
     success = love.window.setMode(width*particleSize, height*particleSize)
+end
 
+function math.clamp(value,min,max)
+    if(value>max)then
+        value=max
+    elseif value<min then
+        value=min
+    end
+    return value
 end
 
 local selectedTextY=10
@@ -30,11 +38,13 @@ function love.draw()
     love.graphics.setPointSize(particleSize)
     sim:draw()
     UI:draw()
-
     love.graphics.setColor(.5,.5,0.5)
     if(debug)then
         love.graphics.print("FPS: "..love.timer.getFPS(),5,10)
         love.graphics.print("Particles: "..particleCount,5,24)
+    end
+    if(paused) then
+        love.graphics.print("PAUSED",love.graphics.getWidth()/2,love.graphics.getHeight()/2)
     end
     love.graphics.print("Selected particle type: "..particleTypes[currentType][1],5,selectedTextY)
     line(mx-8,my, mx-3, my)
@@ -45,10 +55,6 @@ function love.draw()
 end
 
 function love.update(dt) 
-    if(paused)then
-        return
-    end
-    UI:update(dt)
     local cx,cy=love.mouse.getPosition()
     --Drawing.
     if(not UI.showButtons) then
@@ -61,10 +67,10 @@ function love.update(dt)
                         local oY=floor(cy/sim.particleSize)
                         local i=sim:calculate_index(oX+x,oY+y)
                         local type,success=sim:get_index(oX+x,oY+y)
-                        if(type==0 and success and currentType~=0)then
+                        if(type==1 and success and currentType~=1)then
                             sim:set_index(oX+x,oY+y,currentType)  
                             particleCount=particleCount+1
-                        elseif currentType==0 and type~=0 and success then
+                        elseif currentType==1 and type~=1 and success then
                             sim:set_index(oX+x,oY+y,currentType)  
                             particleCount=particleCount-1
                         end
@@ -73,9 +79,15 @@ function love.update(dt)
             end
         end
     end
-    size= size < 1 and 1 or size
-    sim:update(UI.showButtons and dt / 4 or dt)
+    
+    size=math.clamp(size,1,1000)
+    UI:update(dt)
+    if(paused)then
+        return
+    end
+    sim:update(UI.showButtons)
 end
+
 
 
 function love.wheelmoved(x, y)
@@ -95,5 +107,4 @@ function love.keypressed(key)
 	elseif(key=="]")then
 		size=size*2
     end
-    
 end

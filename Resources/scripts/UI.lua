@@ -23,10 +23,10 @@ function UI.load()
     for i = 0,7 do
         if(particleTypes[i])then
             local angle = TWOPI / 4 * i
-            local x_pos = math.cos(angle) * 150
-            local y_pos = math.sin(angle) * 150
-            local panel = u.button({text=particleTypes[i][1], x=(love.graphics.getWidth()/2 - 50)+x_pos, y=(love.graphics.getHeight()/2-50)+y_pos, w=100, h=100, rows=1, cols=1})
-            panel:setStyle({bgColor={particleTypes[i][2][1]+.01,particleTypes[i][2][2]+.01,particleTypes[i][2][3]+.01},fgColor={0,0,0,1}})
+            local x_pos = math.cos(angle) * 100
+            local y_pos = math.sin(angle) * 100
+            local panel = u.button({text=particleTypes[i][1], x=(love.graphics.getWidth()/2 - 25)+x_pos, y=(love.graphics.getHeight()/2-25)+y_pos, w=50, h=50, rows=1, cols=1})
+            panel:setStyle({bgColor={particleTypes[i][2][1]+.03,particleTypes[i][2][2]+.03,particleTypes[i][2][3]+.03},fgColor={0,0,0,1}}) -- Color the buttons using the particle color (+ a small offset because otherwise air button would be invisible)
             panel:action(function (e) currentType=i end)
             table.insert(UI.buttons,panel)
         end
