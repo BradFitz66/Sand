@@ -11,6 +11,14 @@ Sänd is a falling sand simulation made in Love2D. It's based on other falling s
   
   * Powder Game
   
+  * Noita
+### Controls:
+  - Left Click: Paint currently selected particle type
+  - Right Click: Show the particle selection wheel
+  - Left Bracket (\[): Reduce brush size by twenty pixels
+  - Right Bracket (\]): Increase brush size by twenty pixels
+  - P: Pause
+  - Left Alt: Show debug info (FPS, Particle count)
 ### ToDo:
 - [ ] Add multithreading (I don't really know much about multithreading in general so this may never be done)
 - [ ] GPU simulation (another massive IF. I'm not good with shaders or GPU related code in general)
