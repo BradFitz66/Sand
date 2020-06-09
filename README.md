@@ -1,6 +1,6 @@
 ## Sänd
 
-Sänd is a falling sand simulation made in Love2D. It's based on other falling sand games such as:
+Sänd is a falling sand simulation made in Love2D. It's inspired by other falling sand games such as:
   * Sandspiel by Max Bittker (his source code helped a lot)
   
   * Orb.farm by Max Bittker 
