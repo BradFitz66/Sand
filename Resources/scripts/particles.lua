@@ -1,10 +1,17 @@
 local particles={
-    [0]={"AIR",{1,.9,.9,0},function(x,y,s) end,0},
+    [0]={"AIR",{1,.9,.9,1},function(x,y,s) end,0},
     [1]={"SAND",{(255)/255,204/255,128/255},function(x,y,s) return update_sand(x,y,s) end,1},
     [2]={"WALL",{100/255,100/255,100/255},function(x,y,s) return x,y end,0},
-    [3]={"WATER",{116/255,204/255,244/255},function(x,y,s) return update_water(x,y,s) end,1}
+    [3]={"WATER",{116/255,204/255,244/255},function(x,y,s) return update_water(x,y,s) end,1},
 }
 
+function getLength(dictionary)
+    local len=0
+    for _, v in pairs(dictionary) do
+        len=len+1
+    end
+    return len-1 --this will also take into account 'len' inside the dictionary. We don't want that.
+end
 
 function update_sand(x,y,sim)
     local dx=math.random(-1,1)

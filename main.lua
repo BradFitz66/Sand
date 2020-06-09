@@ -1,20 +1,27 @@
 local width,height=976/4,976/4
 local particleSize=4
-local sim
-local debug=false
-local paused=false
-local particleTypes
+local sim=nil
 local size=50
 local particleCount=0
-local currentType=1
+local UI
 local setColor,points,line,circle=love.graphics.setColor,love.graphics.points,love.graphics.line,love.graphics.circle
 local isMouseDown,floor=love.mouse.isDown,math.floor
+--End of local variables
+
+currentType=1
+debug=false
+paused=nil
+particleTypes=nil
+--End of global variables
+
 function love.load()
     love.graphics.setDefaultFilter("nearest","nearest",0)
     sim=require'Resources.scripts.simulation'.new(width,height,particleSize)
     particleTypes=sim.particleTypes
     love.mouse.setVisible(false)
+    UI=require'Resources.scripts.UI'.load()
     success = love.window.setMode(width*particleSize, height*particleSize)
+
 end
 
 local selectedTextY=10
@@ -22,6 +29,8 @@ function love.draw()
     local mx,my=love.mouse.getPosition()
     love.graphics.setPointSize(particleSize)
     sim:draw()
+    UI:draw()
+
     love.graphics.setColor(.5,.5,0.5)
     if(debug)then
         love.graphics.print("FPS: "..love.timer.getFPS(),5,10)
@@ -39,43 +48,33 @@ function love.update(dt)
     if(paused)then
         return
     end
+    UI:update(dt)
     local cx,cy=love.mouse.getPosition()
     --Drawing.
-    if isMouseDown(1) then
-        --Draw filled circle of pixels.
-        for y = floor(-size/sim.particleSize), floor(size/sim.particleSize)+1 do
-			for x= floor(-size/sim.particleSize), floor(size/sim.particleSize)+1 do
-				if((x*x+y*y)<(size*size)/(sim.particleSize*sim.particleSize))then
-					local oX=floor(cx/sim.particleSize)
-                    local oY=floor(cy/sim.particleSize)
-                    local i=sim:calculate_index(oX+x,oY+y)
-                    local type,success=sim:get_index(oX+x,oY+y)
-                    if(type==0 and success)then
-                        sim:set_index(oX+x,oY+y,currentType)  
-                        particleCount=particleCount+1
+    if(not UI.showButtons) then
+        if isMouseDown(1) then
+            --Draw filled circle of pixels.
+            for y = floor(-size/sim.particleSize), floor(size/sim.particleSize)+1 do
+                for x= floor(-size/sim.particleSize), floor(size/sim.particleSize)+1 do
+                    if((x*x+y*y)<(size*size)/(sim.particleSize*sim.particleSize))then
+                        local oX=floor(cx/sim.particleSize)
+                        local oY=floor(cy/sim.particleSize)
+                        local i=sim:calculate_index(oX+x,oY+y)
+                        local type,success=sim:get_index(oX+x,oY+y)
+                        if(type==0 and success and currentType~=0)then
+                            sim:set_index(oX+x,oY+y,currentType)  
+                            particleCount=particleCount+1
+                        elseif currentType==0 and type~=0 and success then
+                            sim:set_index(oX+x,oY+y,currentType)  
+                            particleCount=particleCount-1
+                        end
                     end
-				end
-			end
+                end
+            end
         end
-    elseif isMouseDown(2) then
-
-        for y = floor(-size/sim.particleSize), floor(size/sim.particleSize)+1 do
-			for x= floor(-size/sim.particleSize), floor(size/sim.particleSize)+1 do
-				if((x*x+y*y)<(size*size)/(sim.particleSize*sim.particleSize))then
-					local oX=floor(cx/sim.particleSize)
-                    local oY=floor(cy/sim.particleSize)
-                    local i=sim:calculate_index(oX+x,oY+y)
-                    local type,success=sim:get_index(oX+x,oY+y)
-                    if(type~=0 and success)then
-                        sim:set_index(oX+x,oY+y,0)  
-                        particleCount=particleCount-1
-                    end
-				end
-			end
-		end
     end
     size= size < 1 and 1 or size
-    sim:update(dt)
+    sim:update(UI.showButtons and dt / 4 or dt)
 end
 
 
@@ -97,7 +96,4 @@ function love.keypressed(key)
 		size=size*2
     end
     
-    if(particleTypes[tonumber(key)])then
-        currentType=tonumber(key)
-    end
 end
