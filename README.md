@@ -12,6 +12,16 @@ Sänd is a falling sand simulation made in Love2D. It's inspired by other fallin
   * Powder Game
   
   * Noita
+  
+### How to run:  
+
+  - Download latest version of Love2D from https://love2d.org/
+  - Create a shortcut of the Love2D executable and place it somewhere like your desktop (located in Program Files/LOVE)
+  - Download this repository and extract the Sand-master folder to the same place as the Love2D shortcut
+  - Drag and drop the Sand-master folder onto the Love2D shortcut and it should run the game
+  
+  If there's any errors when you try to run it, take a screenshot and create a new issue.
+
 ### Controls:
   - Left Click: Paint currently selected particle type
   - Right Click: Show the particle selection wheel
