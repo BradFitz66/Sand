@@ -4,25 +4,13 @@ local u = require "Resources.lib.urutora"
 
 local TWOPI = math.pi * 2
 
-local function idk(t, length)
-    return t - math.floor(t/length) * length
-end
-
-local function lerpAngle(a, b, t)
-    local num = idk(b-a, TWOPI)
-    if num > math.pi then
-        num = num - TWOPI
-    end
-    return a + num * t
-end
-local input={text=""}
 function UI.load()
     local UI=setmetatable({}, UI)
     UI.buttons = { }
     u.setResolution(love.graphics.getWidth(), love.graphics.getHeight())
     for i = 0,7 do
         if(particleTypes[i])then
-            local angle = TWOPI / 4 * i
+            local angle = TWOPI / #particleTypes * i
             local x_pos = math.cos(angle) * 100
             local y_pos = math.sin(angle) * 100
             local panel = u.button({text=particleTypes[i][1], x=(love.graphics.getWidth()/2 - 25)+x_pos, y=(love.graphics.getHeight()/2-25)+y_pos, w=50, h=50, rows=1, cols=1})
@@ -41,9 +29,6 @@ function UI:draw()
     end
 end
 
-local rot=0
-local targetRot = 0
-local lastSelectedControl
 local isMouseDown=love.mouse.isDown
 function UI:update(dt)
     local buttons=self.buttons

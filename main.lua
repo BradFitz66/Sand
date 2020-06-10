@@ -15,12 +15,12 @@ particleTypes=nil
 --End of global variables
 
 function love.load()
+    success = love.window.setMode(width*particleSize, height*particleSize)
     love.graphics.setDefaultFilter("nearest","nearest",0)
     sim=require'Resources.scripts.simulation'.new(width,height,particleSize)
     particleTypes=sim.particleTypes
     love.mouse.setVisible(false)
     UI=require'Resources.scripts.UI'.load()
-    success = love.window.setMode(width*particleSize, height*particleSize)
 end
 
 function math.clamp(value,min,max)
@@ -33,6 +33,7 @@ function math.clamp(value,min,max)
 end
 
 local selectedTextY=10
+
 function love.draw() 
     local mx,my=love.mouse.getPosition()
     love.graphics.setPointSize(particleSize)
