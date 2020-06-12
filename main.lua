@@ -2,24 +2,46 @@ local particleSize=2
 local width,height=976/particleSize,976/particleSize
 local sim=nil
 local size=50
-local particleCount=0
+particleCount=0
 local UI
 local setColor,points,line,circle=love.graphics.setColor,love.graphics.points,love.graphics.line,love.graphics.circle
 local isMouseDown,floor=love.mouse.isDown,math.floor
+local timer;
+local printThread
+--local timer=hump.timer
 --End of local variables
 
 currentType=2
 debug=false
 paused=nil
 particleTypes=nil
+mouseDx,mouseDy=0,0
+mx,my=0,0
+lastMouseX,lastMouseY=0,0
 --End of global variables
+local pChannel=love.thread.getChannel ( "print" );
+
+function print(str)
+    pChannel:push(str)
+end
 
 function love.load()
     success = love.window.setMode(width*particleSize, height*particleSize,{vsync=true})
+    printThread=love.thread.newThread( [[
+        while true do
+            local str = love.thread.getChannel( 'print' ):pop()  
+            if(str) then
+                print(str)
+            end
+        end ]] ) 
+    print("LETS FUCKING GOOOOO")
+    printThread:start()
     love.graphics.setDefaultFilter("nearest","nearest",0)
     sim=require'Resources.scripts.simulation'.new(width,height,particleSize)
     particleTypes=sim.particleTypes
     love.mouse.setVisible(false)
+    timer= require 'Resources.lib.hump.timer'
+
     UI=require'Resources.scripts.UI'.load()
 end
 
@@ -34,8 +56,11 @@ end
 
 local selectedTextY=10
 
-function love.draw() 
-    local mx,my=love.mouse.getPosition()
+function love.draw()
+    if(not love.mouse.getRelativeMode()) then
+        mx,my=love.mouse.getPosition()
+    end
+    
     love.graphics.setPointSize(particleSize)
     sim:draw()
     UI:draw()
@@ -52,28 +77,32 @@ function love.draw()
 	line(mx+8,my, mx+3, my)
 	line(mx, my-8, mx, my-3)
     line(mx, my+8, mx, my+3)
-	circle("line",mx,my,size,200)
+    circle("line",mx,my,size,200)
+    if(love.mouse.getRelativeMode()) then
+        line(mx,my, love.mouse.getX(),love.mouse.getY())
+    end
+
+    
 end
 
+
 function love.update(dt) 
-    local cx,cy=love.mouse.getPosition()
     --Drawing.
+    timer.update(dt)
     if(not UI.showButtons) then
         if isMouseDown(1) then
             --Draw filled circle of pixels.
             for y = floor(-size/sim.particleSize), floor(size/sim.particleSize)+1 do
                 for x= floor(-size/sim.particleSize), floor(size/sim.particleSize)+1 do
                     if((x*x+y*y)<(size*size)/(sim.particleSize*sim.particleSize))then
-                        local oX=floor(cx/sim.particleSize)
-                        local oY=floor(cy/sim.particleSize)
+                        local oX=floor(mx/sim.particleSize)
+                        local oY=floor(my/sim.particleSize)
                         local i=sim:calculate_index(oX+x,oY+y)
                         local type,success=sim:get_index(oX+x,oY+y)
                         if(type==1 and success and currentType~=1)then
                             sim:set_index(oX+x,oY+y,currentType)  
-                            particleCount=particleCount+1
                         elseif currentType==1 and type~=1 and success then
                             sim:set_index(oX+x,oY+y,currentType)  
-                            particleCount=particleCount-1
                         end
                     end
                 end
@@ -86,21 +115,41 @@ function love.update(dt)
     if(paused)then
         return
     end
-    sim:update(UI.showButtons)
+    sim:update(dt)
 end
 
+function love.mousepressed(x,y,button)
+    if(button==1)then
+        u.pressed(x, y)
+    elseif(button==2)then
+        print("WOO")
+        showButtons=true
+        lastMouseX=x
+        lastMouseY=y
+        love.mouse.setRelativeMode(true)
+    end
+end
+
+function love.mousereleased(x,y,button)
+    if(button==1)then
+        u.released(x, y)
+    elseif(button==2)then
+        showButtons=false
+        love.mouse.setRelativeMode(false)
+        love.mouse.setPosition(lastMouseX,lastMouseY)
+    end
+end
+
+
+function love.mousemoved(x,y,dx,dy,isTouch)
+    mouseDx=dx
+    mouseDy=dy
+end
 
 
 function love.wheelmoved(x, y)
     if(not UI.showButtons)then
         size=size+y
-    else
-        if(y<0) then
-            currentType=currentType > 1 and currentType-1 or #particleTypes
-        else
-            currentType=currentType < #particleTypes and currentType+1 or 1
-        end
-        UI.buttonOffset=90*(currentType-2);
     end
 end
 

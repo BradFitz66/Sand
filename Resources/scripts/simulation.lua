@@ -10,11 +10,10 @@ function Simulation.new(width,height,particleSize)
     sim.particleSize=particleSize
     --use minimum integer size we can use for memory purposes (doesn't really improve much since even with a normal int we only get just over 1MB of memory)
     ffi.cdef[[
-        typedef struct { uint8_t type,clock; } particle;
+        typedef struct { uint8_t type,clock; float lifetimer; int maxMoves; bool createdChild; } particle;
     ]]
     --Create new array of the particle struct with a size of width*height
     sim.writeBuffer=ffi.new("particle[?]",width*height)
-    print(ffi.sizeof(sim.writeBuffer)) --Size of the writeBuffer in bytes
 
     sim.particleTypes=require 'Resources.scripts.particles'
     sim.updatedIndexes={}
@@ -50,18 +49,31 @@ end
 local random = math.random
 
 --Set a specific index to a specfic type
-function Simulation:set_index(x,y,type)
+function Simulation:set_index(x,y,type,replacing)
     local i = self:calculate_index(x,y)
     --print("Modifing index: "..self.Capi.calculate_index(x,y,self.width-1,self.height-1))
     local color = self.particleTypes[type][2]
     local colorVariation=(math.random(-20,20)*self.particleTypes[type][4])/255
-
+    local extraData=self.particleTypes[type][5]
     if(x>0 and y > 0 and x<self.width-1 and y<self.height-1)then
         self.imageData:setPixel(x,y,color[1]+colorVariation,color[2]+colorVariation,color[3]+colorVariation,1)
         self.writeBuffer[i].type=type
         --Keep particles 1 ahead of the clock if they're being updated.
         self.writeBuffer[i].clock=self.updateClock+1
+
+
+        if(type==1)then
+            particleCount=particleCount-1
+        else
+            --Some particles get replaced (ex: plant replaces water) so we don't want to update the particle count since the particle count would stay the same. 
+            if(not replacing) then
+                particleCount=particleCount+1
+            end
+        end
+    
+         
     end
+
 end
 
 --Draw simulation
@@ -82,7 +94,7 @@ function Simulation:update(dt)
             local data = self.particleTypes[self.writeBuffer[i].type]
             local clock = self.writeBuffer[i].clock
             if(data[1]~="AIR" and(clock-self.updateClock~=1)) then
-                data[3](x,y,self,clock)
+                data[3](x,y,self,self.writeBuffer[i],dt)
             end
         end
     end
