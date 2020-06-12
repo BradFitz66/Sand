@@ -57,6 +57,7 @@ end
 local selectedTextY=10
 
 function love.draw()
+    love.graphics.setLineWidth(1)
     if(not love.mouse.getRelativeMode()) then
         mx,my=love.mouse.getPosition()
     end
@@ -79,6 +80,7 @@ function love.draw()
     line(mx, my+8, mx, my+3)
     circle("line",mx,my,size,200)
     if(love.mouse.getRelativeMode()) then
+        love.graphics.setLineWidth(3)
         line(mx,my, love.mouse.getX(),love.mouse.getY())
     end
 
