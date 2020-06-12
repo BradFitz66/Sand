@@ -1,5 +1,5 @@
-local width,height=976/4,976/4
-local particleSize=4
+local particleSize=2
+local width,height=976/particleSize,976/particleSize
 local sim=nil
 local size=50
 local particleCount=0
@@ -15,7 +15,7 @@ particleTypes=nil
 --End of global variables
 
 function love.load()
-    success = love.window.setMode(width*particleSize, height*particleSize)
+    success = love.window.setMode(width*particleSize, height*particleSize,{vsync=true})
     love.graphics.setDefaultFilter("nearest","nearest",0)
     sim=require'Resources.scripts.simulation'.new(width,height,particleSize)
     particleTypes=sim.particleTypes
@@ -92,7 +92,16 @@ end
 
 
 function love.wheelmoved(x, y)
-	size=size+y
+    if(not UI.showButtons)then
+        size=size+y
+    else
+        if(y<0) then
+            currentType=currentType > 1 and currentType-1 or #particleTypes
+        else
+            currentType=currentType < #particleTypes and currentType+1 or 1
+        end
+        UI.buttonOffset=90*(currentType-2);
+    end
 end
 
 function love.keypressed(key)
