@@ -8,7 +8,7 @@ local particles={
 }
 
 --Update function for sand
-function update_sand(x,y,sim,clock)
+function update_sand(x,y,sim)
     local dx=math.random(-1,1) -- Random direction on the x axis
     local b=sim:get_index(x,y+1) -- Index below current index
     local lr=sim:get_index(x+dx,y+1) --Index to the diagonal down left or right (depending on the value of dx)
@@ -41,7 +41,7 @@ function update_sand(x,y,sim,clock)
     return x,y
 end
 
-function update_water(x,y,sim,clock)
+function update_water(x,y,sim)
     local dx=math.random(-1,1)
     local b=sim:get_index(x,y+1)
     local lrd=sim:get_index(x+dx,y+1)

@@ -8,20 +8,20 @@ function Simulation.new(width,height,particleSize)
     local sim=setmetatable({}, Simulation)
     sim.width,sim.height=width,height
     sim.particleSize=particleSize
+    --use minimum integer size we can use for memory purposes (doesn't really improve much since even with a normal int we only get just over 1MB of memory)
     ffi.cdef[[
         typedef struct { uint8_t type,clock; } particle;
     ]]
-    
- 
+    --Create new array of the particle struct with a size of width*height
     sim.writeBuffer=ffi.new("particle[?]",width*height)
-    
+    print(ffi.sizeof(sim.writeBuffer)) --Size of the writeBuffer in bytes
+
     sim.particleTypes=require 'Resources.scripts.particles'
     sim.updatedIndexes={}
     sim.imageData = love.image.newImageData(width, height)
     for i = 1, width*height do
         sim.writeBuffer[i].type=1
     end
-    print(ffi.sizeof(sim.writeBuffer))
     sim.updateClock=0
     for x=0,width-1 do
         for y=0,height-1 do
@@ -49,18 +49,6 @@ end
 
 local random = math.random
 
-function Simulation:pixelFunction(x, y, r, g, b, a)
-    local i = self:calculate_index(x,y)
-    local data=particleTypes[self.writeBuffer[i]]
-    local pixelColor=data[2]
-    r=pixelColor[1]
-    g=pixelColor[2]
-    b=pixelColor[3]
-    a=1
-    return r, g, b, a
-end
-
-
 --Set a specific index to a specfic type
 function Simulation:set_index(x,y,type)
     local i = self:calculate_index(x,y)
@@ -70,8 +58,8 @@ function Simulation:set_index(x,y,type)
 
     if(x>0 and y > 0 and x<self.width-1 and y<self.height-1)then
         self.imageData:setPixel(x,y,color[1]+colorVariation,color[2]+colorVariation,color[3]+colorVariation,1)
-        -- --self.imageData:mapPixel(function(x,y,r,g,b,a) return self:pixelFunction(x,y,r,g,b,a) end,0,0,self.width,self.height)   
         self.writeBuffer[i].type=type
+        --Keep particles 1 ahead of the clock if they're being updated.
         self.writeBuffer[i].clock=self.updateClock+1
     end
 end
@@ -99,7 +87,7 @@ function Simulation:update(dt)
         end
     end
     self.updateClock=self.updateClock+1
-    if(self.updateClock>254)then
+    if(self.updateClock>254)then --Stop updateClock from going over 255, the maximum value for 8 bit integers. This stops the particle clocks from overflowing to 0.
         self.updateClock=0
     end
 end
