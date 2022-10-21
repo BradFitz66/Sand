@@ -31,8 +31,8 @@ Sänd is a falling sand simulation made in Love2D. It's inspired by other fallin
   - Left Alt: Show debug info (FPS, Particle count)
   - Mouse Wheel: Increase brush size, switch particle (while particle selection wheel is shown)
 ### ToDo:
-- [ ] Add multithreading (I don't really know much about multithreading in general so this may never be done)
-- [ ] GPU simulation (another massive IF. I'm not good with shaders or GPU related code in general)
+- [ ] Add multithreading
+- [ ] GPU simulation 
 - [x] UI
-- [x] use C structs for particle data, utilizing FFI 
-- [ ] ~~Spatial hashing (may not be possible due to how the particles are stored. Need a way to uniquely identify each particle)~~ This won't improve performance at all. The way the simulation is designed is essentially already a spatialhash, albeit a very small one. Particles will never check against particles that aren't neighbours.
+- [x] use FFI to define data structures in C for particles  
+
